@@ -539,4 +539,4 @@ elif proto_type == 'Binary':
         csvwriter1.writerow(dublicate_packet1)
 
     print("-------------Completed----------")
-    time.sleep(10)
+    time.sleep(11)
