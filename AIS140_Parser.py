@@ -426,117 +426,246 @@ if proto_type == 'AIS140':
     print("-------------Completed----------")
     time.sleep(10)
 elif proto_type == 'Binary':
-    print("Select the Binary log file for data analysis......")
-    #time.sleep(2)
-    root = tk.Tk()
-    root.withdraw()
-    filename = filedialog.askopenfilename()
 
-    with open(filename) as file:
-        lines = file.readlines()
-        lines = [line.rstrip() for line in lines]
+    typeofserver = ['Dev', 'ALUAT']
+    print("Type of Server:")
+    print("1 ", typeofserver[0])
+    print("2 ", typeofserver[1])
+    server_type = typeofserver[int(input("Enter the Server index no to select the type of server for parsing: ")) - 1]
+    print("Selected server type is: ", server_type)
 
-    # imei = input("Enter the Device IMEI Number: ")
-    #print(lines)
-    lines1 = []
-    for i in range(len(lines)-1):
-        temp = lines[i].split(':')
-        lines1.append(temp)
-    #print(lines1)
-    lines2 = []
+    if server_type == 'Dev':
+        print("Select the Binary log file for data analysis......")
+        #time.sleep(2)
+        root = tk.Tk()
+        root.withdraw()
+        filename = filedialog.askopenfilename()
 
-    available_imei = []
-    parsed_file = date + "_Parsed_data.csv"
+        with open(filename) as file:
+            lines = file.readlines()
+            lines = [line.rstrip() for line in lines]
 
-    with open(parsed_file, 'w+', newline='') as csvfile:
-        header = ['Header', 'DBOM1', 'IMEI', 'DBOM2', 'seq_no', '','','','','','','','','','','','','','','','','','',
-                  '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
-                  '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
-                  '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
-                  '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
-                  '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
-                  '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
-                  '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
-                  '','','','','','',]
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(header)
-        for i in tqdm(range(len(lines1)), desc='Extracting data......'):
-            temp = lines1[i]
-            #print('temp = ',temp)
-            if len(temp) > 50:
-                temp3 = []
-                flat_list = []
-                for j in range(len(temp)):
-                    try:
-                        temp2 = temp[j].split(',')
-                        temp3.append(temp2)
-                    except:
-                        temp3.append(temp[j])
-                flat_list = [item for sublist in temp3 for item in sublist]
-                #print('ft= ',flat_list)
-                imei = flat_list[2]
-                csvwriter.writerow(flat_list)
-        csvfile.close()
+        # imei = input("Enter the Device IMEI Number: ")
+        #print(lines)
+        lines1 = []
+        for i in range(len(lines)-1):
+            temp = lines[i].split(':')
+            lines1.append(temp)
+        #print(lines1)
+        lines2 = []
 
-    csvData = pandasForSortingCSV.read_csv(parsed_file)
+        available_imei = []
+        parsed_file = date + "_Parsed_data.csv"
 
-    # print("\nBefore sorting:")
-    # print(csvData)
+        with open(parsed_file, 'w+', newline='') as csvfile:
+            header = ['Header', 'DBOM1', 'IMEI', 'DBOM2', 'seq_no', '','','','','','','','','','','','','','','','','','',
+                      '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
+                      '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
+                      '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
+                      '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
+                      '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
+                      '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
+                      '','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',
+                      '','','','','','',]
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(header)
+            for i in tqdm(range(len(lines1)), desc='Extracting data......'):
+                temp = lines1[i]
+                #print('temp = ',temp)
+                if len(temp) > 50:
+                    temp3 = []
+                    flat_list = []
+                    for j in range(len(temp)):
+                        try:
+                            temp2 = temp[j].split(',')
+                            temp3.append(temp2)
+                        except:
+                            temp3.append(temp[j])
+                    flat_list = [item for sublist in temp3 for item in sublist]
+                    #print('ft= ',flat_list)
+                    imei = flat_list[2]
+                    csvwriter.writerow(flat_list)
+            csvfile.close()
 
-    csvData.sort_values(["seq_no"],
-                        axis=0,
-                        ascending=[True],
-                        inplace=True)
+        csvData = pandasForSortingCSV.read_csv(parsed_file)
 
-    # print("\nAfter sorting:")
-    # print(csvData)
-    # print(type(csvData))
-    csvData_reset = csvData.reset_index()
-    csvData_reset.to_csv(parsed_file)
-    seq = csvData_reset.seq_no
+        # print("\nBefore sorting:")
+        # print(csvData)
 
-    data1 = []
-    dublicate_packet = 0
-    dublicate_packet1 = []
-    data_loss = 0
-    data_loss1 = []
-    result_file = date + "_Result.csv"
-    with open(result_file, 'w+', newline='') as csvfile1:
-        header = ['IMEI', 'Curent_Seq_no', 'Previous_Seq_no', 'Data_loss', 'Result']
-        csvwriter1 = csv.writer(csvfile1)
-        csvwriter1.writerow(header)
-        for x in tqdm(range(len(seq) - 1), desc='Performing Operations.......'):
-            y = x + 1
+        csvData.sort_values(["seq_no"],
+                            axis=0,
+                            ascending=[True],
+                            inplace=True)
 
-            dif = seq[y] - seq[x]
-            if dif > 1:
-                #print("Data loss")
-                data1.append(imei)
-                data1.append(seq[y])
-                data1.append(seq[x])
-                data1.append(dif - 1)
-                data1.append('Packet loss')
-                data_loss = data_loss + dif - 1
-                csvwriter1.writerow(data1)
-                data1 = []
-            #check dublicate packet
-            elif dif == 0:
-                data1.append(imei)
-                data1.append(seq[y])
-                data1.append(seq[x])
-                data1.append(dif)
-                data1.append('Dublicate Packet')
-                dublicate_packet = dublicate_packet + 1
-                csvwriter1.writerow(data1)
-                do = 'nothing'
-                data1 = []
+        # print("\nAfter sorting:")
+        # print(csvData)
+        # print(type(csvData))
+        csvData_reset = csvData.reset_index()
+        csvData_reset.to_csv(parsed_file)
+        seq = csvData_reset.seq_no
 
-        data_loss1.append('Total_data_loss= ')
-        data_loss1.append(data_loss)
-        dublicate_packet1.append('Total_dublicate= ')
-        dublicate_packet1.append(dublicate_packet)
-        csvwriter1.writerow(data_loss1)
-        csvwriter1.writerow(dublicate_packet1)
+        data1 = []
+        dublicate_packet = 0
+        dublicate_packet1 = []
+        data_loss = 0
+        data_loss1 = []
+        result_file = date + "_Result.csv"
+        with open(result_file, 'w+', newline='') as csvfile1:
+            header = ['IMEI', 'Curent_Seq_no', 'Previous_Seq_no', 'Data_loss', 'Result']
+            csvwriter1 = csv.writer(csvfile1)
+            csvwriter1.writerow(header)
+            for x in tqdm(range(len(seq) - 1), desc='Performing Operations.......'):
+                y = x + 1
+
+                dif = seq[y] - seq[x]
+                if dif > 1:
+                    #print("Data loss")
+                    data1.append(imei)
+                    data1.append(seq[y])
+                    data1.append(seq[x])
+                    data1.append(dif - 1)
+                    data1.append('Packet loss')
+                    data_loss = data_loss + dif - 1
+                    csvwriter1.writerow(data1)
+                    data1 = []
+                #check dublicate packet
+                elif dif == 0:
+                    data1.append(imei)
+                    data1.append(seq[y])
+                    data1.append(seq[x])
+                    data1.append(dif)
+                    data1.append('Dublicate Packet')
+                    dublicate_packet = dublicate_packet + 1
+                    csvwriter1.writerow(data1)
+                    do = 'nothing'
+                    data1 = []
+
+            data_loapss1.pend('Total_data_loss= ')
+            data_loss1.append(data_loss)
+            dublicate_packet1.append('Total_dublicate= ')
+            dublicate_packet1.append(dublicate_packet)
+            csvwriter1.writerow(data_loss1)
+            csvwriter1.writerow(dublicate_packet1)
+    elif server_type == 'ALUAT':
+        print("Select the Binary log file for data analysis......")
+        # time.sleep(2)
+        root = tk.Tk()
+        root.withdraw()
+        filename = filedialog.askopenfilename()
+
+        with open(filename) as file:
+            lines = file.readlines()
+            lines = [line.rstrip() for line in lines]
+
+        # imei = input("Enter the Device IMEI Number: ")
+        # print(lines)
+        lines1 = []
+        for i in range(len(lines) - 1):
+            temp = lines[i].split(':')
+            lines1.append(temp)
+        # print(lines1)
+        lines2 = []
+
+        available_imei = []
+        parsed_file = date + "_Parsed_data.csv"
+
+        with open(parsed_file, 'w+', newline='') as csvfile:
+            header = ['Header', 'IMEI', 'DBOM2', 'seq_no', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '',
+                      '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                      '', '', '' ]
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(header)
+            for i in tqdm(range(len(lines1)), desc='Extracting data......'):
+                temp = lines1[i]
+                # print('temp = ',temp)
+                if len(temp) > 50:
+                    temp3 = []
+                    flat_list = []
+                    for j in range(len(temp)):
+                        try:
+                            temp2 = temp[j].split(',')
+                            temp3.append(temp2)
+                        except:
+                            temp3.append(temp[j])
+                    flat_list = [item for sublist in temp3 for item in sublist]
+                    # print('ft= ',flat_list)
+                    imei = flat_list[2]
+                    csvwriter.writerow(flat_list)
+            csvfile.close()
+
+        csvData = pandasForSortingCSV.read_csv(parsed_file)
+
+        # print("\nBefore sorting:")
+        # print(csvData)
+
+        csvData.sort_values(["seq_no"],
+                            axis=0,
+                            ascending=[True],
+                            inplace=True)
+
+        # print("\nAfter sorting:")
+        # print(csvData)
+        # print(type(csvData))
+        csvData_reset = csvData.reset_index()
+        csvData_reset.to_csv(parsed_file)
+        seq = csvData_reset.seq_no
+
+        data1 = []
+        dublicate_packet = 0
+        dublicate_packet1 = []
+        data_loss = 0
+        data_loss1 = []
+        result_file = date + "_Result.csv"
+        with open(result_file, 'w+', newline='') as csvfile1:
+            header = ['IMEI', 'Curent_Seq_no', 'Previous_Seq_no', 'Data_loss', 'Result']
+            csvwriter1 = csv.writer(csvfile1)
+            csvwriter1.writerow(header)
+            for x in tqdm(range(len(seq) - 1), desc='Performing Operations.......'):
+                y = x + 1
+
+                dif = seq[y] - seq[x]
+                if dif > 1:
+                    # print("Data loss")
+                    data1.append(imei)
+                    data1.append(seq[y])
+                    data1.append(seq[x])
+                    data1.append(dif - 1)
+                    data1.append('Packet loss')
+                    data_loss = data_loss + dif - 1
+                    csvwriter1.writerow(data1)
+                    data1 = []
+                # check dublicate packet
+                elif dif == 0:
+                    data1.append(imei)
+                    data1.append(seq[y])
+                    data1.append(seq[x])
+                    data1.append(dif)
+                    data1.append('Dublicate Packet')
+                    dublicate_packet = dublicate_packet + 1
+                    csvwriter1.writerow(data1)
+                    data1 = []
+
+            data_loapss1.pend('Total_data_loss= ')
+            data_loss1.append(data_loss)
+            dublicate_packet1.append('Total_dublicate= ')
+            dublicate_packet1.append(dublicate_packet)
+            csvwriter1.writerow(data_loss1)
+            csvwriter1.writerow(dublicate_packet1)
+    else:
+        print("Wrong server index entry")
 
     print("-------------Completed----------")
     time.sleep(11)
