@@ -668,7 +668,7 @@ elif proto_type == 'Binary':
         print("Wrong server index entry")
 
 
-    do = "Git push"
+    do = "Git push 1"
 
     print("-------------Completed----------")
     time.sleep(11)
